@@ -18,7 +18,7 @@ class SpectralEqualSizeClustering(object):
     Input parameters:
         nclusters (int): number of clusters
         nneighbors (int): number of neighbors. Used by the spectral clustering to
-                            contruct the affinity matrix. Good values are between 7% and 15%
+                            construct the affinity matrix. Good values are between 7% and 15%
                             of the dataset points.
         equity_fr (float): Equity fraction. Value in range (0,1] which decides how equal the clusters
                            could be. The higher the fraction, the more equal the clusters BUT the less
@@ -36,9 +36,6 @@ class SpectralEqualSizeClustering(object):
         self.seed = seed
 
         self.first_clustering = None
-        self.first_cdisp = None  # dispersion in distance of each cluster
-        self.first_total_disp = None
-        self.first_eq_coeff = None
         self.first_wcsd = None  # dispersion (in distance) of each cluster
         self.first_wcss = None  # total dispersion. less wcss gets more compact clusters
 
@@ -48,16 +45,13 @@ class SpectralEqualSizeClustering(object):
 
         # Final results after relaxation
         self.final_clustering = None
-        self.final_cdisp = None
-        self.final_total_disp = None  # total dispersion. How disperse are the final clusters. opposite to compactness
-        self.final_eq_coeff = None  # how equally sized are the final clusters
         self.final_wcsd = None
         self.final_wcss = None
 
     @staticmethod
     def _within_cluster_distances(dist_matrix, clusters):
         """
-        Funtion that computes the so-called within cluster squared distance (wcsd). The wcsd is defined
+        Function that computes the so-called within cluster squared distance (wcsd). The wcsd is defined
         as the dispersion in distance of all the elements of a cluster. The sum of the wcsd od all the
         clusters in a dataset is called the total dispersion in distance (wcss). The lower the wcss, the
         more compact the clusters are.
@@ -85,7 +79,7 @@ class SpectralEqualSizeClustering(object):
     def _optimal_cluster_sizes(nclusters, npoints):
         """
         Gives the optimal number of points in each cluster.
-        For instance,  if we have 11 points and we want 3 clusters,
+        For instance,  if we have 11 points, and we want 3 clusters,
         2 clusters will have 4 points and one cluster, 3.
         """
         min_points, max_points = math.floor(npoints / float(nclusters)), math.floor(npoints / float(nclusters)) + 1
