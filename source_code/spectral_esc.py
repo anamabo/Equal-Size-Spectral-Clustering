@@ -23,10 +23,23 @@ class SpectralEqualSizeClustering:
         equity_fraction (float): Equity fraction. Value in range (0,1] which decides how equal the clusters
                            could be. The higher the fraction, the more equal the clusters BUT the less
                            compact.
+        seed (int): Random seed generator.
+
+    Attributes:
+        first_clustering (data frame): Table containing the cluster labels of each point in the initialisation.
+        first_wcsd (data frame): A table with indexes corresponding to each cluster and a column
+                                containing the dispersion in distance of each cluster.
+        first_wcss (float): sum of first_wcsd
+        final_clustering  (data frame): Table containing the cluster labels of each point after the balancing
+                                        of the clusters in size.
+        final_wcsd (data frame): A table with indexes corresponding to each cluster and a column
+                                containing the dispersion in distance of each cluster (after the balancing in size).
+        final_wcss (float): sum of final_wcsd. This can be used as a metric to optimise the input parameters.
+
 
     How to use this class:
-    cl = SpectralEqualSizeClustering(nclusters=2, nneighbors=100, equity_fr=0.5, seed=11362)
-    cl.fit(dm)
+    cl = SpectralEqualSizeClustering(nclusters=2, nneighbors=100, equity_fraction=0.5, seed=11362)
+    cluster_labels = cl.fit(dm)
     """
 
     def __init__(self, nclusters: int = None, nneighbors: int = None, equity_fraction=0.3, seed=None):
@@ -171,7 +184,7 @@ class SpectralEqualSizeClustering:
             cluster_to_modify: a list of labels of clusters that receive points.
             idxc: dictionary with keys clusters_to_modify and values the points of these clusters, ex:
                   {'0': [idx1, idx2,...,idxn]}
-        Returs:
+        Returns:
             A table with the closest distance of points in clabel to clusters in
             clusters_to_modify
         """
