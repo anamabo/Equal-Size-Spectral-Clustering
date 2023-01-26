@@ -10,7 +10,7 @@ import math
 logging.basicConfig()
 logging.getLogger().setLevel(logging.INFO)
 
-class SpectralEqualSizeClustering(object):
+class SpectralEqualSizeClustering:
     """
     Uses spectral clustering to obtain an initial configuration of clusters.
     This configuration is compact but NOT equal-sized. To make clusters equal-sized (in number of points),
@@ -18,9 +18,9 @@ class SpectralEqualSizeClustering(object):
     Input parameters:
         nclusters (int): number of clusters
         nneighbors (int): number of neighbors. Used by the spectral clustering to
-                            construct the affinity matrix. Good values are between 7% and 15%
-                            of the dataset points.
-        equity_fr (float): Equity fraction. Value in range (0,1] which decides how equal the clusters
+                          construct the affinity matrix. Good values are between 7% and 15%
+                          of the dataset points.
+        equity_fraction (float): Equity fraction. Value in range (0,1] which decides how equal the clusters
                            could be. The higher the fraction, the more equal the clusters BUT the less
                            compact.
 
@@ -29,9 +29,9 @@ class SpectralEqualSizeClustering(object):
     cl.fit(dm)
     """
 
-    def __init__(self, nclusters: int = None, nneighbors: int = None, equity_fr=0.3, seed=None):
+    def __init__(self, nclusters: int = None, nneighbors: int = None, equity_fraction=0.3, seed=None):
         self.nclusters = nclusters
-        self.equity_fr = equity_fr
+        self.equity_fr = equity_fraction
         self.nneighbors = nneighbors
         self.seed = seed
 

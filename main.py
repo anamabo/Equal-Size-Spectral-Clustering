@@ -11,7 +11,7 @@ dist_tr = np.load("datasets/symmetric_dist_tr.npy")  # symmetrize TM. Ojo, poner
 
 clustering = SpectralEqualSizeClustering(nclusters=6,
                                          nneighbors=int(dist_tr.shape[0] * 0.1),
-                                         equity_fr=0.9,
+                                         equity_fraction=0.9,
                                          seed=1234
                                          )
 
