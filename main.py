@@ -3,11 +3,11 @@ import numpy as np
 from source_code.spectral_esc import SpectralEqualSizeClustering
 from source_code.visualisation import visualise_clusters
 
-# read file with coordinates
+# read the file with coordinates
 coords = pd.read_csv("datasets/restaurants_in_amsterdam.csv")
 
-# read the distance matrix file associated to the coordinates
-dist_tr = np.load("datasets/symmetric_dist_tr.npy")  # symmetrize TM. Ojo, poner esto en el blog!
+# read the file of the symmetric distance matrix associated to the coordinates
+dist_tr = np.load("datasets/symmetric_dist_tr.npy")
 
 clustering = SpectralEqualSizeClustering(nclusters=6,
                                          nneighbors=int(dist_tr.shape[0] * 0.1),
