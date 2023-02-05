@@ -65,7 +65,7 @@ class SpectralEqualSizeClustering:
     def _within_cluster_distances(dist_matrix, clusters):
         """
         Function that computes the so-called within cluster squared distance (wcsd). The wcsd is defined
-        as the dispersion in distance of all the elements of a cluster. The sum of the wcsd od all the
+        as the dispersion in distance of all the elements of a cluster. The sum of the wcsd of all the
         clusters in a dataset is called the total dispersion in distance (wcss). The lower the wcss, the
         more compact the clusters are.
         Inputs:
