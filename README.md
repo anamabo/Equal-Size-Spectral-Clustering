@@ -11,5 +11,6 @@ In the folder `datasets` we have provided you with a toy dataset
 so you can run the clustering code right away. Specifications of the input dataset
 are explained in the blog post. 
 
-## Entry Point
-You can use the file ``main.py`` to run the clustering code. 
+## Examples
+* example1.py: From a set of hyperparameters, you obtain clusters with sizes roughly equal to N / `nclusters`  
+* example2.py: From a range of cluster sizes, you obtain the clusters hyperparameters to run the clustering code. 
