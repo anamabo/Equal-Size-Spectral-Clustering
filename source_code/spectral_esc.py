@@ -10,6 +10,7 @@ import math
 logging.basicConfig()
 logging.getLogger().setLevel(logging.INFO)
 
+
 class SpectralEqualSizeClustering:
     """
     Uses spectral clustering to obtain an initial configuration of clusters.
@@ -27,14 +28,15 @@ class SpectralEqualSizeClustering:
 
     Attributes:
         first_clustering (data frame): Table containing the cluster labels of each point in the initialisation.
-        first_wcsd (data frame): A table with indexes corresponding to each cluster and a column
+        first_cluster_dispersion (data frame): A table with indexes corresponding to each cluster and a column
                                 containing the dispersion in distance of each cluster.
-        first_wcss (float): sum of first_wcsd
+        first_total_cluster_dispersion (float): sum of first_cluster_dispersion
         final_clustering  (data frame): Table containing the cluster labels of each point after the balancing
                                         of the clusters in size.
-        final_wcsd (data frame): A table with indexes corresponding to each cluster and a column
+        final_cluster_dispersion (data frame): A table with indexes corresponding to each cluster and a column
                                 containing the dispersion in distance of each cluster (after the balancing in size).
-        final_wcss (float): sum of final_wcsd. This can be used as a metric to optimise the input parameters.
+        total_cluster_dispersion (float): sum of final_cluster_dispersion.
+                                 This attribute can be used as a metric to optimise the cluster hyperparameters.
 
 
     How to use this class:
@@ -49,25 +51,25 @@ class SpectralEqualSizeClustering:
         self.seed = seed
 
         self.first_clustering = None
-        self.first_wcsd = None  # dispersion (in distance) of each cluster
-        self.first_wcss = None  # total dispersion. less wcss gets more compact clusters
+        self.first_cluster_dispersion = None  # A table with each cluster dispersion (in distance)
+        self.first_total_cluster_dispersion = None  # total cluster dispersion.
 
         self.range_points = None
         self.nn_df = None  # table of number of neighbors per point
         self.cneighbors = None  # Dictionary of cluster neighbors
 
-        # Final results after relaxation
+        # Final results after equalization of clusters
         self.final_clustering = None
-        self.final_wcsd = None
-        self.final_wcss = None
+        self.final_cluster_dispersion = None
+        self.total_cluster_dispersion = None
 
     @staticmethod
-    def _within_cluster_distances(dist_matrix, clusters):
+    def _cluster_dispersion(dist_matrix, clusters):
         """
-        Function that computes the so-called within cluster squared distance (wcsd). The wcsd is defined
-        as the dispersion in distance of all the elements of a cluster. The sum of the wcsd of all the
-        clusters in a dataset is called the total dispersion in distance (wcss). The lower the wcss, the
-        more compact the clusters are.
+        Function that computes the cluster dispersion. The cluster dispersion is defined
+        as the standard deviation in distance of all the elements within a cluster. The sum of the cluster dispersion
+        of all the clusters in a dataset is called the total cluster dispersion. The lower the cluster dispersion,
+        the more compact the clusters are.
         Inputs:
         dist_matrix: numpy array of the distance matrix
         clusters: table with cluster labels of each event. columns: 'label', index: points
@@ -76,17 +78,17 @@ class SpectralEqualSizeClustering:
         if 'label' not in clusters.columns:
             raise ValueError('Table of clusters does not have "label" column.')
 
-        def compactness(points, dm):
+        def std_distances(points, dm):
             distances = np.tril(dm[np.ix_(points, points)])
             distances[distances == 0] = np.nan
-            wcsd = np.nanstd(distances)
-            return wcsd
+            cdispersion = np.nanstd(distances)
+            return cdispersion
 
         nclusters = clusters['label'].nunique()
         points_per_cluster = [list(clusters[clusters.label == cluster].index) for cluster in range(nclusters)]
-        wcsdist = [compactness(points_per_cluster[cluster], dist_matrix) for cluster in range(nclusters)]
-        compactness_df = pd.DataFrame(wcsdist, index=np.arange(nclusters), columns=['wcsd'])
-        return compactness_df
+        wcsdist = [std_distances(points_per_cluster[cluster], dist_matrix) for cluster in range(nclusters)]
+        cluster_dispersion_df = pd.DataFrame(wcsdist, index=np.arange(nclusters), columns=['cdispersion'])
+        return cluster_dispersion_df
 
     @staticmethod
     def _optimal_cluster_sizes(nclusters, npoints):
@@ -214,8 +216,8 @@ class SpectralEqualSizeClustering:
         initial_clustering.fit(dist_matrix)
         initial_labels = initial_clustering.labels_
         self.first_clustering = pd.DataFrame(initial_labels, columns=['label'])
-        self.first_wcsd = self._within_cluster_distances(dist_matrix, self.first_clustering)
-        self.first_wcss = self.first_wcsd.wcsd.sum()
+        self.first_cluster_dispersion = self._cluster_dispersion(dist_matrix, self.first_clustering)
+        self.first_total_cluster_dispersion = self.first_cluster_dispersion['cdispersion'].sum()
 
     def cluster_equalization(self, dmatrix):
         """
@@ -242,10 +244,10 @@ class SpectralEqualSizeClustering:
 
         large_clusters, small_clusters = self._get_clusters_outside_range(clustering, min_range, max_range)
 
-        if ((len(large_clusters) == 0) & (len(small_clusters) == 0)):
+        if (len(large_clusters) == 0) & (len(small_clusters) == 0):
             self.final_clustering = self.first_clustering.copy()
-            self.final_wcsd = self._within_cluster_distances(dmatrix, self.final_clustering)
-            self.final_wcss = self.final_wcsd.sum(axis=0).wcsd
+            self.final_cluster_dispersion = self._cluster_dispersion(dmatrix, self.final_clustering)
+            self.total_cluster_dispersion = self.final_cluster_dispersion.sum(axis=0).wcsd
 
         other_clusters = list(set(all_clusters) - set(large_clusters))  # clusters that receive points
         inx = {c: list(clustering[clustering.label == c].index) for c in other_clusters}
@@ -271,7 +273,7 @@ class SpectralEqualSizeClustering:
                     clustering.loc[point, 'label'] = new_label
                     leftovers -= 1
 
-            other_clusters = self._get_no_large_clusters(clustering,max_range)
+            other_clusters = self._get_no_large_clusters(clustering, max_range)
             inx = {c: list(clustering[clustering.label == c].index) for c in other_clusters}
 
         # update clusters
@@ -280,8 +282,8 @@ class SpectralEqualSizeClustering:
 
         if len(small_clusters) == 0:
             self.final_clustering = clustering
-            self.final_wcsd = self._within_cluster_distances(dmatrix, self.final_clustering)
-            self.final_wcss = self.final_wcsd.sum(axis=0).wcsd
+            self.final_cluster_dispersion = self._cluster_dispersion(dmatrix, self.final_clustering)
+            self.total_cluster_dispersion = self.final_cluster_dispersion.sum(axis=0).wcsd
 
         else:  # get bigger the small clusters
             cl_elements = list(clustering[clustering.label.isin(clusters_to_steal)].index)
@@ -307,8 +309,8 @@ class SpectralEqualSizeClustering:
                     needed_points[new_label] -= 1
 
             self.final_clustering = clustering
-            self.final_wcsd = self._within_cluster_distances(dmatrix, self.final_clustering)
-            self.final_wcss = self.final_wcsd.sum(axis=0).wcsd
+            self.final_cluster_dispersion = self._cluster_dispersion(dmatrix, self.final_clustering)
+            self.total_cluster_dispersion = self.final_cluster_dispersion['cdispersion'].sum(axis=0)
 
         return None
 
@@ -336,4 +338,3 @@ class SpectralEqualSizeClustering:
             self.cluster_equalization(dmatrix)
 
         return list(self.final_clustering.label.values)
-
