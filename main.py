@@ -1,7 +1,11 @@
 import pandas as pd
 import numpy as np
-from source_code.spectral_esc import SpectralEqualSizeClustering
+import logging
+from source_code.spectral_equal_size_clustering import SpectralEqualSizeClustering
 from source_code.visualisation import visualise_clusters
+
+logging.basicConfig()
+logging.getLogger().setLevel(logging.INFO)
 
 # read the file with coordinates. This file is used only for visualization purposes
 coords = pd.read_csv("datasets/restaurants_in_amsterdam.csv")
@@ -17,7 +21,7 @@ clustering = SpectralEqualSizeClustering(nclusters=6,
 labels = clustering.fit(dist_tr)
 
 coords["cluster"] = labels
-print(coords.cluster.value_counts())
+logging.info(f"Points per cluster: \n {coords.cluster.value_counts()}")
 clusters_figure = visualise_clusters(coords,
                                      longitude_colname="longitude",
                                      latitude_colname="latitude",
