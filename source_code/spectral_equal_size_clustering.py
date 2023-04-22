@@ -247,7 +247,7 @@ class SpectralEqualSizeClustering:
         if (len(large_clusters) == 0) & (len(small_clusters) == 0):
             self.final_clustering = self.first_clustering.copy()
             self.final_cluster_dispersion = self._cluster_dispersion(dmatrix, self.final_clustering)
-            self.total_cluster_dispersion = self.final_cluster_dispersion.sum(axis=0).wcsd
+            self.total_cluster_dispersion = self.final_cluster_dispersion["cdispersion"].sum(axis=0)
 
         other_clusters = list(set(all_clusters) - set(large_clusters))  # clusters that receive points
         inx = {c: list(clustering[clustering.label == c].index) for c in other_clusters}
@@ -283,7 +283,7 @@ class SpectralEqualSizeClustering:
         if len(small_clusters) == 0:
             self.final_clustering = clustering
             self.final_cluster_dispersion = self._cluster_dispersion(dmatrix, self.final_clustering)
-            self.total_cluster_dispersion = self.final_cluster_dispersion.sum(axis=0).wcsd
+            self.total_cluster_dispersion = self.final_cluster_dispersion["cdispersion"].sum(axis=0)
 
         else:  # get bigger the small clusters
             cl_elements = list(clustering[clustering.label.isin(clusters_to_steal)].index)
