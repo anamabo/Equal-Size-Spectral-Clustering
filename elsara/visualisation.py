@@ -5,7 +5,7 @@ Module to visualise the clusters on a map
 import logging
 import pandas as pd
 import numpy as np
-import source_code.utils as utils
+import elsara.utils as utils
 import plotly.graph_objects as go
 
 logging.basicConfig()
