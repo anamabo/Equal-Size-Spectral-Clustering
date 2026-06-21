@@ -5,7 +5,7 @@
 # ELSARA: EquaL-size SpectrAl clusteRing Algorithm
 This is a modification of the [spectral clustering algorithm](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.SpectralClustering.html) that builds clusters balanced 
 in the number of points. A detailed explanation of the model can be found 
-[in this Medium blog post](https://medium.com/p/cce65c6f9ba3/edit).
+[in this Medium blog post](https://medium.com/data-science/equal-size-spectral-clustering-cce65c6f9ba3).
 
 ## Prerequisities
 * Python 3.13 
@@ -34,10 +34,10 @@ Formatting also runs automatically on every commit via [pre-commit](https://pre-
 In the folder `datasets` we have provided you with a toy dataset
 so you can run the clustering code right away. 
 
-* *restaurants_in_amsterdam.csv:* [Describe]
-*  *symmetric_distr_tr.npy:* [Describe]
+* *restaurants_in_amsterdam.csv:* A table with locations of restaurants in the city of Amsterdam
+*  *symmetric_distr_tr.npy:* A file with the travel distance between the restaurants
 
-You can find more specification in the [blog post](https://medium.com/p/cce65c6f9ba3/edit). 
+You can find more specification on how to use these datasets in the project's [blog post](https://medium.com/data-science/equal-size-spectral-clustering-cce65c6f9ba3). 
 
 ## Examples
 * *example1.py:* From a set of hyperparameters, you obtain clusters with sizes roughly equal to N / `nclusters`  
