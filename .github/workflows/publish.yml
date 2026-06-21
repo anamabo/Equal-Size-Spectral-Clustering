@@ -1,0 +1,27 @@
+# triggers when pyproject.toml changes on main (i.e., right after the PR is merged).
+# Builds and publishes to PyPI
+
+name: Publish to PyPI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "pyproject.toml"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - uses: snok/install-poetry@v1
+
+      - name: Build and publish
+        run: poetry publish --build
+        env:
+          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}

@@ -1,4 +1,4 @@
-![Logo](images/logo.png)
+![Logo](https://raw.githubusercontent.com/anamabo/Equal-Size-Spectral-Clustering/main/images/logo.png)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 

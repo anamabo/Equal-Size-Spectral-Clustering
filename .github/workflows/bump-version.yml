@@ -1,0 +1,59 @@
+# triggers when a label is added to a PR targeting main:
+# Bump system:
+#    fix → poetry version patch (e.g. 0.2.0 → 0.2.1)
+#    feature → poetry version minor (e.g. 0.2.0 → 0.3.0)
+#    breaking change → poetry version major (e.g. 0.2.0 → 1.0.0)
+#    Any other label → does nothing
+# It commits the updated pyproject.toml back to the PR branch automatically.
+
+name: Bump version
+
+on:
+  pull_request:
+    branches: [main]
+    types: [labeled]
+
+permissions:
+  contents: write
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - uses: snok/install-poetry@v1
+
+      - name: Determine bump type from label
+        id: bump
+        run: |
+          LABEL="${{ github.event.label.name }}"
+          if [ "$LABEL" = "fix" ]; then
+            echo "type=patch" >> $GITHUB_OUTPUT
+          elif [ "$LABEL" = "feature" ]; then
+            echo "type=minor" >> $GITHUB_OUTPUT
+          elif [ "$LABEL" = "breaking change" ]; then
+            echo "type=major" >> $GITHUB_OUTPUT
+          else
+            echo "type=skip" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Bump version
+        if: steps.bump.outputs.type != 'skip'
+        run: poetry version ${{ steps.bump.outputs.type }}
+
+      - name: Commit and push
+        if: steps.bump.outputs.type != 'skip'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add pyproject.toml
+          git commit -m "Bump version to $(poetry version --short)"
+          git push
