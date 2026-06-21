@@ -1,16 +1,23 @@
-# Equal-Size Spectral Clustering
-This is a modification of the spectral clustering code that builds clusters balanced 
-in the number of points. A detailed explanation of this algorithm can be found 
+![Logo](images/logo.png)
+
+# ELSARA: EquaL-size SpectrAl clusteRing Algorithm
+This is a modification of the [spectral clustering algorithm](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.SpectralClustering.html) that builds clusters balanced 
+in the number of points. A detailed explanation of the model can be found 
 [in this Medium blog post](https://medium.com/p/cce65c6f9ba3/edit).
 
 ## Prerequisities
-You need to install Python 3.9. There is a Pipfile to install the required libraries.
+* Python 3.13 
+* Poetry (in MAC: `brew install poetry`)
 
 ## Toy datasets
 In the folder `datasets` we have provided you with a toy dataset
-so you can run the clustering code right away. Specifications of the input dataset
-are explained in the blog post. 
+so you can run the clustering code right away. 
+
+* *restaurants_in_amsterdam.csv:* [Describe]
+*  *symmetric_distr_tr.npy:* [Describe]
+
+You can find more specification in the [blog post](https://medium.com/p/cce65c6f9ba3/edit). 
 
 ## Examples
-* example1.py: From a set of hyperparameters, you obtain clusters with sizes roughly equal to N / `nclusters`  
-* example2.py: From a range of cluster sizes, you obtain the clusters hyperparameters to run the clustering code. 
+* *example1.py:* From a set of hyperparameters, you obtain clusters with sizes roughly equal to N / `nclusters`  
+* *example2.py:* From a range of cluster sizes, you obtain the clusters hyperparameters to run the clustering code. 
