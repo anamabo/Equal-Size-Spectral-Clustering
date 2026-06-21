@@ -6,8 +6,7 @@ From a set of hyperparameters, you get clusters with size roughly equal to N/ncl
 import pandas as pd
 import numpy as np
 import logging
-from source_code.spectral_equal_size_clustering import SpectralEqualSizeClustering
-from source_code.visualisation import visualise_clusters
+from elsara import SpectralEqualSizeClustering, visualise_clusters
 
 logging.basicConfig()
 logging.getLogger().setLevel(logging.INFO)

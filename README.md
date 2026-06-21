@@ -43,5 +43,74 @@ You can find more specification on how to use these datasets in the project's [b
 * *example1.py:* From a set of hyperparameters, you obtain clusters with sizes roughly equal to N / `nclusters`  
 * *example2.py:* From a range of cluster sizes, you obtain the clusters hyperparameters to run the clustering code. 
 
+## Usage
+
+### Example 1: fixed hyperparameters
+
+Provide `nclusters`, `nneighbors`, and `equity_fraction` directly. Each cluster will contain roughly `N / nclusters` points.
+
+```python
+import pandas as pd
+import numpy as np
+from elsara import SpectralEqualSizeClustering, visualise_clusters
+
+# coords is used only for visualization
+coords = pd.read_csv("datasets/restaurants_in_amsterdam.csv")
+dist_tr = np.load("datasets/symmetric_dist_tr.npy")
+
+clustering = SpectralEqualSizeClustering(
+    nclusters=6, nneighbors=int(dist_tr.shape[0] * 0.1), equity_fraction=1, seed=1234
+)
+
+labels = clustering.fit(dist_tr)
+
+coords["cluster"] = labels
+clusters_figure = visualise_clusters(
+    coords,
+    longitude_colname="longitude",
+    latitude_colname="latitude",
+    label_col="cluster",
+    zoom=11,
+)
+clusters_figure.show()
+```
+
+### Example 2: derive hyperparameters from a target size range
+
+Specify the desired min/max cluster size and let the algorithm derive the hyperparameters automatically.
+
+```python
+import pandas as pd
+import numpy as np
+from elsara import SpectralEqualSizeClustering, visualise_clusters
+
+coords = pd.read_csv("datasets/restaurants_in_amsterdam.csv")
+dist_tr = np.load("datasets/symmetric_dist_tr.npy")
+
+min_range, max_range = 50, 70  # desired number of points per cluster
+
+npoints = coords.shape[0]
+avg_range = (max_range + min_range) / 2.0
+nclusters = int(npoints / avg_range)
+equity_fraction = 1 - ((avg_range - min_range) / avg_range)
+nneighbors = int(npoints * (avg_range / npoints))
+
+clustering = SpectralEqualSizeClustering(
+    nclusters=nclusters, nneighbors=nneighbors, equity_fraction=equity_fraction, seed=1234
+)
+
+labels = clustering.fit(dist_tr)
+
+coords["cluster"] = labels
+clusters_figure = visualise_clusters(
+    coords,
+    longitude_colname="longitude",
+    latitude_colname="latitude",
+    label_col="cluster",
+    zoom=11,
+)
+clusters_figure.show()
+```
+
 ## License
 This project is licensed under the [MIT License](LICENSE).
