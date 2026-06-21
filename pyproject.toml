@@ -1,0 +1,12 @@
+[tool.poetry]
+name = "elsara"
+version = "0.2.0"
+description = "EquaL-size SpectrAl clusteRing Algorithm  "
+authors = ["Carmen Adriana Martínez Barbosa <camartinez.barbosa@gmail.com>"]
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "~3.13"
+pandas = ">=2.2"
+plotly = ">=5.18"
+scikit-learn = ">=1.5"
