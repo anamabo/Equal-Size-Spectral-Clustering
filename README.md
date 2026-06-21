@@ -120,6 +120,13 @@ make format
 
 Formatting also runs automatically on every commit via [pre-commit](https://pre-commit.com/).
 
+## Unit tests
+Make sure the unit tests pass when doing updates in the code base. You can run them with this command:
+
+```
+poetry run pytest tests/ -v
+```
+
 ## PR creation
 
 1. Create a branch using one of the following prefixes and open a PR to `main`:
