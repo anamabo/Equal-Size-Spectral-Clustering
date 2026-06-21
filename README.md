@@ -7,28 +7,11 @@ This is a modification of the [spectral clustering algorithm](https://scikit-lea
 in the number of points. A detailed explanation of the model can be found 
 [in this Medium blog post](https://medium.com/data-science/equal-size-spectral-clustering-cce65c6f9ba3).
 
-## Prerequisities
-* Python 3.13 
-* Poetry (in MAC: `brew install poetry`)
+## Installation
 
-## Setup
+Installation occurs through pip:
 
-Install dependencies and register the git hooks:
-
-```bash
-poetry install
-make install-hooks
-```
-
-## Code formatting
-
-This project uses [ruff](https://docs.astral.sh/ruff/) and [black](https://black.readthedocs.io/) for code formatting. To format all files manually, run:
-
-```bash
-make format
-```
-
-Formatting also runs automatically on every commit via [pre-commit](https://pre-commit.com/).
+`pip install elsara`
 
 ## Toy datasets
 In the folder `datasets` we have provided you with a toy dataset
@@ -111,6 +94,42 @@ clusters_figure = visualise_clusters(
 )
 clusters_figure.show()
 ```
+
+# How to contribute
+
+## Prerequisities
+* Python 3.13 
+* Poetry (in MAC: `brew install poetry`)
+
+## Setup
+
+Install dependencies and register the git hooks:
+
+```bash
+poetry install
+make install-hooks
+```
+
+## Code formatting
+
+This project uses [ruff](https://docs.astral.sh/ruff/) and [black](https://black.readthedocs.io/) for code formatting. To format all files manually, run:
+
+```bash
+make format
+```
+
+Formatting also runs automatically on every commit via [pre-commit](https://pre-commit.com/).
+
+## PR creation
+
+1. Create a branch using one of the following prefixes and open a PR to `main`:
+   - `fix/` — bug fix, bumps the patch version (e.g. 0.2.0 → 0.2.1)
+   - `feature/` — new feature, bumps the minor version (e.g. 0.2.0 → 0.3.0)
+   - `breaking/` — breaking change, bumps the major version (e.g. 0.2.0 → 1.0.0)
+   
+**Important:** If the branch name doesn't follow this name convention, won't be accepted, as it won't update the package in PyPi.
+   
+2. Create a PR to be reviewed by anamabo. She will suggest changes or approve your PR. In the later case, a new version of ELSARA is published to PyPI automatically.
 
 ## License
 This project is licensed under the [MIT License](LICENSE).
