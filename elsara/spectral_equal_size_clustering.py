@@ -297,9 +297,9 @@ class SpectralEqualSizeClustering:
             self.final_cluster_dispersion = self._cluster_dispersion(
                 dmatrix, self.final_clustering
             )
-            self.total_cluster_dispersion = self.final_cluster_dispersion.sum(
-                axis=0
-            ).wcsd
+            self.total_cluster_dispersion = self.final_cluster_dispersion[
+                "cdispersion"
+            ].sum(axis=0)
 
         other_clusters = list(
             set(all_clusters) - set(large_clusters)
@@ -345,9 +345,9 @@ class SpectralEqualSizeClustering:
             self.final_cluster_dispersion = self._cluster_dispersion(
                 dmatrix, self.final_clustering
             )
-            self.total_cluster_dispersion = self.final_cluster_dispersion.sum(
-                axis=0
-            ).wcsd
+            self.total_cluster_dispersion = self.final_cluster_dispersion[
+                "cdispersion"
+            ].sum(axis=0)
 
         else:  # get bigger the small clusters
             cl_elements = list(
