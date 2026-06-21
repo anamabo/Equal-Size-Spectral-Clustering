@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "elsara"
-version = "0.2.0"
+version = "0.3.0"
 description = "EquaL-size SpectrAl clusteRing Algorithm"
 authors = ["Carmen Adriana Martínez Barbosa <camartinez.barbosa@gmail.com>"]
 readme = "README.md"
