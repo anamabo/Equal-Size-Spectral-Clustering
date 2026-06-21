@@ -1,9 +1,13 @@
 [tool.poetry]
 name = "elsara"
 version = "0.2.0"
-description = "EquaL-size SpectrAl clusteRing Algorithm  "
+description = "EquaL-size SpectrAl clusteRing Algorithm"
 authors = ["Carmen Adriana Martínez Barbosa <camartinez.barbosa@gmail.com>"]
-package-mode = false
+readme = "README.md"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.dependencies]
 python = "~3.13"
