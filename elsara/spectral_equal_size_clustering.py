@@ -1,6 +1,7 @@
 """
 Module containing the Spectral Equal Size Clustering method
 """
+
 import numpy as np
 import pandas as pd
 from sklearn.cluster import SpectralClustering
@@ -44,14 +45,22 @@ class SpectralEqualSizeClustering:
     cluster_labels = cl.fit(dm)
     """
 
-    def __init__(self, nclusters: int = None, nneighbors: int = None, equity_fraction=0.3, seed=None):
+    def __init__(
+        self,
+        nclusters: int = None,
+        nneighbors: int = None,
+        equity_fraction=0.3,
+        seed=None,
+    ):
         self.nclusters = nclusters
         self.equity_fr = equity_fraction
         self.nneighbors = nneighbors
         self.seed = seed
 
         self.first_clustering = None
-        self.first_cluster_dispersion = None  # A table with each cluster dispersion (in distance)
+        self.first_cluster_dispersion = (
+            None  # A table with each cluster dispersion (in distance)
+        )
         self.first_total_cluster_dispersion = None  # total cluster dispersion.
 
         self.range_points = None
@@ -85,9 +94,17 @@ class SpectralEqualSizeClustering:
             return cdispersion
 
         nclusters = clusters["label"].nunique()
-        points_per_cluster = [list(clusters[clusters.label == cluster].index) for cluster in range(nclusters)]
-        wcsdist = [std_distances(points_per_cluster[cluster], dist_matrix) for cluster in range(nclusters)]
-        cluster_dispersion_df = pd.DataFrame(wcsdist, index=np.arange(nclusters), columns=["cdispersion"])
+        points_per_cluster = [
+            list(clusters[clusters.label == cluster].index)
+            for cluster in range(nclusters)
+        ]
+        wcsdist = [
+            std_distances(points_per_cluster[cluster], dist_matrix)
+            for cluster in range(nclusters)
+        ]
+        cluster_dispersion_df = pd.DataFrame(
+            wcsdist, index=np.arange(nclusters), columns=["cdispersion"]
+        )
         return cluster_dispersion_df
 
     @staticmethod
@@ -97,7 +114,10 @@ class SpectralEqualSizeClustering:
         For instance,  if we have 11 points, and we want 3 clusters,
         2 clusters will have 4 points and one cluster, 3.
         """
-        min_points, max_points = math.floor(npoints / float(nclusters)), math.floor(npoints / float(nclusters)) + 1
+        min_points, max_points = (
+            math.floor(npoints / float(nclusters)),
+            math.floor(npoints / float(nclusters)) + 1,
+        )
         number_clusters_with_max_points = npoints % nclusters
         number_clusters_with_min_points = nclusters - number_clusters_with_max_points
 
@@ -113,7 +133,10 @@ class SpectralEqualSizeClustering:
                     This assumption is important so don't change it!
         """
         npoints = dm.shape[0]
-        nn_data = [[p, list(pd.Series(dm[:, p]).sort_values().index[1: nneighbors])] for p in range(0, npoints)]
+        nn_data = [
+            [p, list(pd.Series(dm[:, p]).sort_values().index[1:nneighbors])]
+            for p in range(0, npoints)
+        ]
         nn_data = pd.DataFrame(nn_data, columns=["index", "nn"]).set_index("index")
         return nn_data
 
@@ -130,23 +153,30 @@ class SpectralEqualSizeClustering:
         """
         if self.nn_df is None:
             raise Exception(
-                "Nearest neighbour table not found. Use self.get_nneighbours_per_point(distmat, nneighbors)")
+                "Nearest neighbour table not found. Use self.get_nneighbours_per_point(distmat, nneighbors)"
+            )
 
         def cluster_neighbor_for_point(nn_list, nneighbours):
-            nn_labels = df1.loc[nn_list[0:nneighbours], 'label']
+            nn_labels = df1.loc[nn_list[0:nneighbours], "label"]
             return np.unique(nn_labels)
 
         df1 = df.copy()
         df1 = pd.merge(df1, self.nn_df, left_index=True, right_index=True)
-        nn = min(30, self.nneighbors)  # nearest neighbours to compute border points: this def is arbitrary
-        df1["unique_clusters"] = df1.apply(lambda row: cluster_neighbor_for_point(row["nn"], nn), axis=1)
+        nn = min(
+            30, self.nneighbors
+        )  # nearest neighbours to compute border points: this def is arbitrary
+        df1["unique_clusters"] = df1.apply(
+            lambda row: cluster_neighbor_for_point(row["nn"], nn), axis=1
+        )
 
         temp = df1[["unique_clusters"]]
         # get neighbor clusters (remove own cluster)
         neighbors = {}
         for c in range(self.nclusters):
             points_in_cluster = df1.label == c
-            neighbors_in_cluster = temp.loc[points_in_cluster, "unique_clusters"].to_list()
+            neighbors_in_cluster = temp.loc[
+                points_in_cluster, "unique_clusters"
+            ].to_list()
             neighbors[c] = {i for l in neighbors_in_cluster for i in l if i != c}
         return neighbors
 
@@ -193,13 +223,23 @@ class SpectralEqualSizeClustering:
         neighbor_cluster = []
         distances = []
         for point in cl_elements:
-            dist = {c: dmatrix[idxc[c], point].mean() for c in clusters_to_modify}  # Instead of min. Worth future inv.
+            dist = {
+                c: dmatrix[idxc[c], point].mean() for c in clusters_to_modify
+            }  # Instead of min. Worth future inv.
             new_label = min(dist, key=dist.get)  # closest cluster
             neighbor_cluster.append(new_label)
             distances.append(dist[new_label])
 
-        cdistances = pd.DataFrame({"points": cl_elements, "neighbor_c": neighbor_cluster, "distance": distances})
-        cdistances = cdistances.sort_values(by="distance", ascending=True).set_index("points")
+        cdistances = pd.DataFrame(
+            {
+                "points": cl_elements,
+                "neighbor_c": neighbor_cluster,
+                "distance": distances,
+            }
+        )
+        cdistances = cdistances.sort_values(by="distance", ascending=True).set_index(
+            "points"
+        )
         return cdistances
 
     def cluster_initialization(self, dist_matrix):
@@ -208,16 +248,22 @@ class SpectralEqualSizeClustering:
         are imbalanced.
         """
         # discretize is less sensitive to random initialization.
-        initial_clustering = SpectralClustering(n_clusters=self.nclusters,
-                                                assign_labels="discretize",
-                                                n_neighbors=self.nneighbors,
-                                                affinity="precomputed_nearest_neighbors",
-                                                random_state=self.seed)
+        initial_clustering = SpectralClustering(
+            n_clusters=self.nclusters,
+            assign_labels="discretize",
+            n_neighbors=self.nneighbors,
+            affinity="precomputed_nearest_neighbors",
+            random_state=self.seed,
+        )
         initial_clustering.fit(dist_matrix)
         initial_labels = initial_clustering.labels_
         self.first_clustering = pd.DataFrame(initial_labels, columns=["label"])
-        self.first_cluster_dispersion = self._cluster_dispersion(dist_matrix, self.first_clustering)
-        self.first_total_cluster_dispersion = self.first_cluster_dispersion["cdispersion"].sum()
+        self.first_cluster_dispersion = self._cluster_dispersion(
+            dist_matrix, self.first_clustering
+        )
+        self.first_total_cluster_dispersion = self.first_cluster_dispersion[
+            "cdispersion"
+        ].sum()
 
     def cluster_equalization(self, dmatrix):
         """
@@ -242,19 +288,29 @@ class SpectralEqualSizeClustering:
         all_clusters = list(np.arange(0, self.nclusters))
         clustering = self.first_clustering.copy()
 
-        large_clusters, small_clusters = self._get_clusters_outside_range(clustering, min_range, max_range)
+        large_clusters, small_clusters = self._get_clusters_outside_range(
+            clustering, min_range, max_range
+        )
 
         if (len(large_clusters) == 0) & (len(small_clusters) == 0):
             self.final_clustering = self.first_clustering.copy()
-            self.final_cluster_dispersion = self._cluster_dispersion(dmatrix, self.final_clustering)
-            self.total_cluster_dispersion = self.final_cluster_dispersion["cdispersion"].sum(axis=0)
+            self.final_cluster_dispersion = self._cluster_dispersion(
+                dmatrix, self.final_clustering
+            )
+            self.total_cluster_dispersion = self.final_cluster_dispersion[
+                "cdispersion"
+            ].sum(axis=0)
 
-        other_clusters = list(set(all_clusters) - set(large_clusters))  # clusters that receive points
+        other_clusters = list(
+            set(all_clusters) - set(large_clusters)
+        )  # clusters that receive points
         inx = {c: list(clustering[clustering.label == c].index) for c in other_clusters}
 
         for clarge in large_clusters:  # make smaller the big clusters
             cl_elements = list(clustering[clustering.label == clarge].index)
-            closest_distance = self._get_points_to_switch(dmatrix, cl_elements, other_clusters, inx)
+            closest_distance = self._get_points_to_switch(
+                dmatrix, cl_elements, other_clusters, inx
+            )
 
             leftovers = len(cl_elements) - elements_per_cluster[clarge]
 
@@ -274,28 +330,49 @@ class SpectralEqualSizeClustering:
                     leftovers -= 1
 
             other_clusters = self._get_no_large_clusters(clustering, max_range)
-            inx = {c: list(clustering[clustering.label == c].index) for c in other_clusters}
+            inx = {
+                c: list(clustering[clustering.label == c].index) for c in other_clusters
+            }
 
         # update clusters
-        large_clusters, small_clusters = self._get_clusters_outside_range(clustering, min_range, max_range)
+        large_clusters, small_clusters = self._get_clusters_outside_range(
+            clustering, min_range, max_range
+        )
         clusters_to_steal = list(set(all_clusters) - set(small_clusters))
 
         if len(small_clusters) == 0:
             self.final_clustering = clustering
-            self.final_cluster_dispersion = self._cluster_dispersion(dmatrix, self.final_clustering)
-            self.total_cluster_dispersion = self.final_cluster_dispersion["cdispersion"].sum(axis=0)
+            self.final_cluster_dispersion = self._cluster_dispersion(
+                dmatrix, self.final_clustering
+            )
+            self.total_cluster_dispersion = self.final_cluster_dispersion[
+                "cdispersion"
+            ].sum(axis=0)
 
         else:  # get bigger the small clusters
-            cl_elements = list(clustering[clustering.label.isin(clusters_to_steal)].index)
-            inx = {c: list(clustering[clustering.label == c].index) for c in small_clusters}
-            closest_distance = self._get_points_to_switch(dmatrix, cl_elements, small_clusters, inx)
+            cl_elements = list(
+                clustering[clustering.label.isin(clusters_to_steal)].index
+            )
+            inx = {
+                c: list(clustering[clustering.label == c].index) for c in small_clusters
+            }
+            closest_distance = self._get_points_to_switch(
+                dmatrix, cl_elements, small_clusters, inx
+            )
 
-            needed_points = {c: min_range - clustering[clustering.label == c].shape[0] for c in small_clusters}
+            needed_points = {
+                c: min_range - clustering[clustering.label == c].shape[0]
+                for c in small_clusters
+            }
 
             for point in list(closest_distance.index):
-                new_label = closest_distance.loc[point, "neighbor_c"]  # cluster that might receive the point
+                new_label = closest_distance.loc[
+                    point, "neighbor_c"
+                ]  # cluster that might receive the point
                 current_label = clustering.loc[point, "label"]
-                points_current_label = clustering[clustering.label == current_label].shape[0]
+                points_current_label = clustering[
+                    clustering.label == current_label
+                ].shape[0]
 
                 if needed_points[new_label] <= 0:
                     break
@@ -309,8 +386,12 @@ class SpectralEqualSizeClustering:
                     needed_points[new_label] -= 1
 
             self.final_clustering = clustering
-            self.final_cluster_dispersion = self._cluster_dispersion(dmatrix, self.final_clustering)
-            self.total_cluster_dispersion = self.final_cluster_dispersion["cdispersion"].sum(axis=0)
+            self.final_cluster_dispersion = self._cluster_dispersion(
+                dmatrix, self.final_clustering
+            )
+            self.total_cluster_dispersion = self.final_cluster_dispersion[
+                "cdispersion"
+            ].sum(axis=0)
 
         return None
 
@@ -320,8 +401,9 @@ class SpectralEqualSizeClustering:
         """
 
         logging.info(
-            f"parameters of the cluster: nclusters: {self.nclusters,} "
-            f"equity_fr: {self.equity_fr} nneighbours: {self.nneighbors}")
+            f"parameters of the cluster: nclusters: {(self.nclusters,)} "
+            f"equity_fr: {self.equity_fr} nneighbours: {self.nneighbors}"
+        )
 
         # number of neighbors and cluster neighbors. They do not change
         self.nn_df = self.get_nneighbours_per_point(dmatrix, self.nneighbors)
@@ -330,7 +412,9 @@ class SpectralEqualSizeClustering:
             raise Exception("Number of clusters equal to number of events.")
 
         if self.nclusters <= 1:
-            raise ValueError("Incorrect number of clusters. It should be higher or equal than 2.")
+            raise ValueError(
+                "Incorrect number of clusters. It should be higher or equal than 2."
+            )
 
         else:
             self.cluster_initialization(dmatrix)

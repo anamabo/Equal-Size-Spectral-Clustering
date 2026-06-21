@@ -1,0 +1,65 @@
+# Triggers when a PR is merged into main.
+# Bump system derived from branch name prefix:
+#    fix/*       → poetry version patch (e.g. 0.2.0 → 0.2.1)
+#    feature/*   → poetry version minor (e.g. 0.2.0 → 0.3.0)
+#    breaking/*  → poetry version major (e.g. 0.2.0 → 1.0.0)
+#    anything else → does nothing
+
+name: Bump version and publish to PyPI
+
+on:
+  pull_request:
+    branches: [main]
+    types: [closed]
+
+permissions:
+  contents: write
+
+jobs:
+  bump-and-publish:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - uses: snok/install-poetry@v1
+
+      - name: Determine bump type from branch name
+        id: bump
+        run: |
+          BRANCH="${{ github.head_ref }}"
+          if [[ "$BRANCH" == fix/* ]]; then
+            echo "type=patch" >> $GITHUB_OUTPUT
+          elif [[ "$BRANCH" == feature/* ]]; then
+            echo "type=minor" >> $GITHUB_OUTPUT
+          elif [[ "$BRANCH" == breaking/* ]]; then
+            echo "type=major" >> $GITHUB_OUTPUT
+          else
+            echo "type=skip" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Bump version on main
+        if: steps.bump.outputs.type != 'skip'
+        run: poetry version ${{ steps.bump.outputs.type }}
+
+      - name: Commit and push to main
+        if: steps.bump.outputs.type != 'skip'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add pyproject.toml
+          git commit -m "Bump version to $(poetry version --short)"
+          git push
+
+      - name: Build and publish to PyPI
+        if: steps.bump.outputs.type != 'skip'
+        run: poetry publish --build
+        env:
+          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}

@@ -2,11 +2,11 @@
 This script shows how to get a set of hyperparameters based on
 a range of desired cluster sizes. This is contrary to what is in example1.py
 """
+
 import pandas as pd
 import numpy as np
 import logging
-from source_code.spectral_equal_size_clustering import SpectralEqualSizeClustering
-from source_code.visualisation import visualise_clusters
+from elsara import SpectralEqualSizeClustering, visualise_clusters
 
 logging.basicConfig()
 logging.getLogger().setLevel(logging.INFO)
@@ -21,26 +21,29 @@ min_range, max_range = 50, 70  # desired number of points per cluster
 
 # Get the cluster hyperparameters
 npoints = coords.shape[0]
-avg_range = (max_range + min_range)/2.
+avg_range = (max_range + min_range) / 2.0
 nclusters = int(npoints / avg_range)
-eq_fr = 1 - ((avg_range - min_range)/avg_range)
+eq_fr = 1 - ((avg_range - min_range) / avg_range)
 nn_fr = avg_range / npoints
-nneighbors = int(npoints*nn_fr)
+nneighbors = int(npoints * nn_fr)
 
-logging.info(f"The hyperparameters are: nclusters={nclusters}, nneighbors={nneighbors}, equity_fraction={eq_fr}")
+logging.info(
+    f"The hyperparameters are: nclusters={nclusters}, nneighbors={nneighbors}, equity_fraction={eq_fr}"
+)
 
-clustering = SpectralEqualSizeClustering(nclusters=nclusters,
-                                         nneighbors=nneighbors,
-                                         equity_fraction=eq_fr,
-                                         seed=1234)
+clustering = SpectralEqualSizeClustering(
+    nclusters=nclusters, nneighbors=nneighbors, equity_fraction=eq_fr, seed=1234
+)
 
 labels = clustering.fit(dist_tr)
 
 coords["cluster"] = labels
 logging.info(f"Points per cluster: \n {coords.cluster.value_counts()}")
-clusters_figure = visualise_clusters(coords,
-                                     longitude_colname="longitude",
-                                     latitude_colname="latitude",
-                                     label_col="cluster",
-                                     zoom=11)
+clusters_figure = visualise_clusters(
+    coords,
+    longitude_colname="longitude",
+    latitude_colname="latitude",
+    label_col="cluster",
+    zoom=11,
+)
 clusters_figure.show()
