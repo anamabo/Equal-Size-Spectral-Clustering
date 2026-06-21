@@ -10,3 +10,7 @@ python = "~3.13"
 pandas = ">=2.2"
 plotly = ">=5.18"
 scikit-learn = ">=1.5"
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.15.18"
+black = "^26.5.1"
+pre-commit = "^4.6.0"
